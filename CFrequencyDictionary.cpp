@@ -2,9 +2,10 @@
 #include <algorithm>
 #include <vector>
 #include  <iostream>
-#include <iterator>
+#include <sstream> 
 
 #include "CFrequencyDictionary.h"
+#include "Utils/Utils.h"
 
 std::string CFrequencyDictionary::getError() const
 {
@@ -47,7 +48,9 @@ bool CFrequencyDictionary::loadData(const char * filename, std::string& data)
 
 	try
 	{
-		data.assign((std::istreambuf_iterator<char>(file.rdbuf())), std::istreambuf_iterator<char>());
+		std::stringstream strStream;
+		strStream << file.rdbuf();
+		data = strStream.str();
 	}
 	catch(const std::exception& e)
 	{
@@ -61,8 +64,6 @@ bool CFrequencyDictionary::loadData(const char * filename, std::string& data)
 		m_error = "Input file is empty";
 		return false;
 	}
-
-	std::transform(data.begin(), data.end(), data.begin(), ::tolower);
 
 	return true;
 }
@@ -91,20 +92,27 @@ FrequencyMap CFrequencyDictionary::getFrequencyMap(const std::string& str)
 {
 	FrequencyMap freqMap;
 
-	size_t last_pos = 0;
+	ToLowerConverter converter;
 	std::string token;
-	for (size_t i = 0; i < str.length(); i++)
+	char ch;
+
+	char* begin = const_cast<char*>(str.c_str());
+	const char* end = begin + str.size();
+
+	for (char* c = begin; c < end; c++)
 	{
-		if (str[i] < 'a' || str[i] > 'z')
+		ch = converter[*c];
+		if (ch < 'a' || ch > 'z')
 		{
-			if (i == last_pos)
+			if (token.size())
 			{
-				last_pos +=1;
-				continue;
+				freqMap[token]++;
+				token.clear();
 			}
-			token = str.substr(last_pos, i-last_pos);
-			freqMap[token]++;
-			last_pos = i+1;
+		}
+		else
+		{
+			token += ch;
 		}
 	}
 

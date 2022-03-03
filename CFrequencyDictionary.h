@@ -2,9 +2,10 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <set>
 
-using FrequencyMap = std::map<std::string, size_t>;
+using FrequencyMap = std::unordered_map<std::string, size_t>;
 using WordType = FrequencyMap::key_type;
 using SizeType = FrequencyMap::value_type::second_type;
 
